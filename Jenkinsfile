@@ -21,7 +21,7 @@ pipeline {
         DOCKER_CREDENTIALS = 'docker_creds'
         KUBECONFIG = "/home/jenkins/.kube/config"
         SONARQUBE_URL = "https://sonarcloud.io"
-        SONARQUBE_TOKEN = "SonarQubeToken"
+        SONARQUBE_TOKEN = credentials('SonarQubeToken') // Correct way to reference the token
     }
 
     triggers {
@@ -118,7 +118,17 @@ pipeline {
             echo 'Build failed!'
             emailext(
                 subject: "Jenkins Build Failed: ${currentBuild.fullDisplayName}",
-                to: 'abhilashkonda770@gmail.com'
+                to: 'abhilashkonda770@gmail.com',
+                body: """
+            Hello,
+
+            The build with ID ${currentBuild.fullDisplayName} has failed.
+
+            Please check the Jenkins console output for more details.
+
+            Regards,
+            Jenkins
+        """
             )
         }
     }
