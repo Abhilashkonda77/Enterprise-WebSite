@@ -60,25 +60,23 @@ pipeline {
 
         /* ---------------- SONARQUBE ---------------- */
         stage('Static Analysis (SonarQube)') {
-            steps {
-                script {
-                    echo 'Running SonarQube Analysis...'
-
-                    /* Tool name MUST match Jenkins → Tools exactly */
-                    def scannerHome = tool 'SonarScanner'
-
-                    sh '''
-                        ${scannerHome}/bin/sonar-scanner \
-                          -Dsonar.projectKey=sechay-web-app \
-                          -Dsonar.organization=sechay-team \
-                          -Dsonar.host.url=$SONARQUBE_URL \
-                          -Dsonar.login=$SONARQUBE_TOKEN  \
-                          -Dsonar.branch.name=${params.FEATURE_BRANCH_URI} \
-                          -Dsonar.exclusions=node_modules/**,dist/**,coverage/**,e2e/**
-                    '''
+          steps {
+            script {
+                def scannerHome = tool 'SonarScanner'
+                sh """
+                    ${scannerHome}/bin/sonar-scanner \
+                    -Dsonar.projectKey=sechay-web-app \
+                    -Dsonar.organization=sechay-team \
+                    -Dsonar.host.url=$SONARQUBE_URL \
+                    -Dsonar.login=$SONARQUBE_TOKEN \
+                    -Dsonar.sources=src/app \
+                    -Dsonar.exclusions=**/* \
+                    -Dsonar.inclusions=src/app/**/*.ts
+                """
                 }
             }
         }
+
 
         /* ---------------- UNIT TESTS ---------------- */
         stage('Run Tests') {
