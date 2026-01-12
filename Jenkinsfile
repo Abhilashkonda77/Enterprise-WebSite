@@ -1,5 +1,5 @@
 pipeline {
-    agent any 
+    agent any
 
     parameters {
         booleanParam(
@@ -12,47 +12,51 @@ pipeline {
             defaultValue: true,
             description: 'Test Feature Branch before merging to Main?'
         )
+        string(
+            name: 'FEATURE_BRANCH_URI',
+            defaultValue: 'feature/test',
+            description: 'Feature branch name (example: feature/login)'
+        )
     }
 
     environment {
-        REGISTRY = "docker pull abhilash369/sechay_website:v1"
+        REGISTRY = "abhilashkonda77/enterprise-website"
         IMAGETAG = "${env.BUILD_NUMBER}"
         GIT_CREDENTIALS = 'github_creds'
         DOCKER_CREDENTIALS = 'docker_creds'
         KUBECONFIG = "/home/jenkins/.kube/config"
         SONARQUBE_URL = "https://sonarcloud.io"
-        SONARQUBE_TOKEN = credentials('SonarQubeToken') // Correct way to reference the token
+        SONARQUBE_TOKEN = credentials('SonarQubeToken')
     }
 
     triggers {
-        githubPush()  // This should be a valid trigger, ensure that GitHub webhook is set up
+        githubPush()
     }
 
     stages {
-        // 1. Checkout SCM
+
+        /* ---------------- CHECKOUT SCM ---------------- */
         stage('Checkout SCM') {
             steps {
                 script {
                     if (params.TEST_FEATURE_BRANCH) {
-                        // Checkout feature branch dynamically
                         echo "Building feature branch: ${params.FEATURE_BRANCH_URI}"
                         checkout([
                             $class: 'GitSCM',
-                            branches: [[name: "*/${params.FEATURE_BRANCH_URI.split('/').last()}"]],
+                            branches: [[name: "*/${params.FEATURE_BRANCH_URI}"]],
                             userRemoteConfigs: [[
                                 url: 'https://github.com/Abhilashkonda77/Enterprise-WebSite',
-                                credentialsId: 'github_creds'
+                                credentialsId: GIT_CREDENTIALS
                             ]]
                         ])
                     } else {
-                        // Checkout main branch (default behavior)
                         echo "Building main branch"
                         checkout([
                             $class: 'GitSCM',
                             branches: [[name: '*/main']],
                             userRemoteConfigs: [[
                                 url: 'https://github.com/Abhilashkonda77/Enterprise-WebSite',
-                                credentialsId: 'github_creds'
+                                credentialsId: GIT_CREDENTIALS
                             ]]
                         ])
                     }
@@ -60,24 +64,24 @@ pipeline {
             }
         }
 
-        // 2. Static Analysis (SonarQube)
+        /* ---------------- SONARQUBE ---------------- */
         stage('Static Analysis (SonarQube)') {
             steps {
                 script {
                     echo 'Running SonarQube Analysis...'
                     sh """
-                    sonar-scanner \
-                    -Dsonar.projectKey=sechay-web-app \
-                    -Dsonar.organization=sechay-team \
-                    -Dsonar.host.url=$SONARQUBE_URL \
-                    -Dsonar.login=$SONARQUBE_TOKEN
+                        sonar-scanner \
+                        -Dsonar.projectKey=sechay-web-app \
+                        -Dsonar.organization=sechay-team \
+                        -Dsonar.host.url=${SONARQUBE_URL} \
+                        -Dsonar.login=${SONARQUBE_TOKEN}
                     """
                 }
             }
         }
 
-        // 3. Run Tests & Unit Tests
-        stage('Run Test') {
+        /* ---------------- UNIT TESTS ---------------- */
+        stage('Run Tests') {
             steps {
                 script {
                     echo 'Running Unit Tests...'
@@ -86,22 +90,22 @@ pipeline {
             }
         }
 
-        // 4. Build Docker Image
+        /* ---------------- DOCKER BUILD ---------------- */
         stage('Build Docker Image') {
             steps {
                 script {
                     echo 'Building Docker image...'
-                    sh 'docker build -t abhilashkonda77/enterprise-website:${IMAGETAG} .'
+                    sh "docker build -t ${REGISTRY}:${IMAGETAG} ."
                 }
             }
         }
 
-        // 5. Scan Image with Trivy
+        /* ---------------- TRIVY SCAN ---------------- */
         stage('Scan Image with Trivy') {
             steps {
                 script {
                     echo 'Scanning Docker image with Trivy...'
-                    sh 'trivy image --severity CRITICAL abhilashkonda77/enterprise-website:${IMAGETAG}'
+                    sh "trivy image --severity CRITICAL ${REGISTRY}:${IMAGETAG}"
                 }
             }
         }
@@ -111,24 +115,17 @@ pipeline {
         always {
             cleanWs()
         }
+
         success {
             echo 'Build was successful!'
         }
+
         failure {
             echo 'Build failed!'
             emailext(
                 subject: "Jenkins Build Failed: ${currentBuild.fullDisplayName}",
                 to: 'abhilashkonda770@gmail.com',
-                body: """
-            Hello,
-
-            The build with ID ${currentBuild.fullDisplayName} has failed.
-
-            Please check the Jenkins console output for more details.
-
-            Regards,
-            Jenkins
-        """
+                body: "The build ${currentBuild.fullDisplayName} has failed. Please check the Jenkins console output for more details."
             )
         }
     }
