@@ -2,11 +2,11 @@ pipeline {
     agent any
 
     parameters {
-        booleanParam(
+        /* booleanParam(
             name: 'ENABLE_BLUE_GREEN',
             defaultValue: true,
             description: 'Enable Blue-Green deployment?'
-        )
+        )*/
         booleanParam(
             name: 'TEST_FEATURE_BRANCH',
             defaultValue: true,
