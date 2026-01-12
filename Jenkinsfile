@@ -22,7 +22,7 @@ pipeline {
     environment {
         REGISTRY = "abhilashkonda77/enterprise-website"
         IMAGETAG = "${env.BUILD_NUMBER}"
-        GIT_CREDENTIALS = 'github_creds'
+        GIT_CREDENTIALS = 'github-pat'
         DOCKER_CREDENTIALS = 'docker_creds'
         KUBECONFIG = "/home/jenkins/.kube/config"
         SONARQUBE_URL = "https://sonarcloud.io"
@@ -46,7 +46,7 @@ pipeline {
                             branches: [[name: "*/${params.FEATURE_BRANCH_URI}"]],
                             userRemoteConfigs: [[
                                 url: 'https://github.com/Abhilashkonda77/Enterprise-WebSite',
-                                credentialsId: GIT_CREDENTIALS
+                                credentialsId: github-pat
                             ]]
                         ])
                     } else {
@@ -56,7 +56,7 @@ pipeline {
                             branches: [[name: '*/main']],
                             userRemoteConfigs: [[
                                 url: 'https://github.com/Abhilashkonda77/Enterprise-WebSite',
-                                credentialsId: GIT_CREDENTIALS
+                                credentialsId: github-pat
                             ]]
                         ])
                     }
