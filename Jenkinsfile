@@ -72,7 +72,9 @@ pipeline {
                           -Dsonar.projectKey=sechay-web-app \
                           -Dsonar.organization=sechay-team \
                           -Dsonar.host.url=$SONARQUBE_URL \
-                          -Dsonar.login=$SONARQUBE_TOKEN
+                          -Dsonar.login=$SONARQUBE_TOKEN  \
+                          -Dsonar.branch.name=${params.FEATURE_BRANCH_URI} \
+                          -Dsonar.exclusions=node_modules/**,dist/**,coverage/**,e2e/**
                     '''
                 }
             }
