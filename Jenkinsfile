@@ -58,16 +58,17 @@ pipeline {
         /* ---------------- SONARQUBE ---------------- */
         stage('Static Analysis (SonarQube)') {
           steps {
-            withSonarQubeEnv('SonarCloud') {
-            sh '''
-              sonar-scanner \
-                -Dsonar.projectKey=sechay-web-app \
-                -Dsonar.organization=sechay-team \
-                -Dsonar.sources=. \
-                -Dsonar.exclusions=**/node_modules/**,**/dist/**,**/*.yaml,Dockerfile
-            '''
+            script {
+                def scannerHome = tool 'SonarScanner'
+                sh '''
+                    ${scannerHome}/bin/sonar-scanner \
+                          -Dsonar.projectKey=sechay-web-app \
+                          -Dsonar.organization=sechay-team \
+                          -Dsonar.sources=. \
+                          -Dsonar.exclusions=**/node_modules/**,**/dist/**
+                '''
+                }
             }
-         }
         }
 
 
