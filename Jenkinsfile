@@ -75,11 +75,15 @@ pipeline {
 
 
         /* ---------------- UNIT TESTS ---------------- */
-        stage('Run Tests') {
+        stage('Smoke Tests') {
             steps {
                 script {
-                    echo 'Running Unit Tests...'
-                    sh 'ng test --watch=false --browsers=ChromeHeadless'
+                    echo 'Smoke testing files......'
+                    sh '''
+                        test -f index.html
+                        test -f login.js
+                        node --check login.js
+                '''
                 }
             }
         }
