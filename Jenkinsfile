@@ -30,9 +30,6 @@ pipeline {
         SONARQUBE_TOKEN = credentials('SonarQubeToken')
     }
 
-    triggers {
-        githubPush()
-    }
 
     stages {
 
