@@ -1,35 +1,35 @@
-pipeline{
+pipeline {
     agent any
 
-    parameters{
+    parameters {
         string(
             name: 'IMAGE_TAG',
-            description: 'Docker Image tag built in CI (e.g built number)'
+            description: 'Docker image tag built in CI (e.g. build number)'
         )
     }
+
     environment {
         REGISTRY = "abhilashkonda77/enterprise-website"
-        IMAGE = "${REGISTRY}:${params.IMAGE_TAG}"
-        DOCKER_CREDENTIALS= "docker_creds"
-
+        IMAGE    = "${REGISTRY}:${params.IMAGE_TAG}"
+        DOCKER_CREDENTIALS = "docker_creds"
     }
+
     stages {
-        stage('push to registry'){
-            steps{
+        stage('push to registry') {
+            steps {
                 withCredentials([usernamePassword(
-                    credentialsId: env.DOCKER_CREDNTIALS,
+                    credentialsId: env.DOCKER_CREDENTIALS,
                     usernameVariable: 'DOCKER_USER',
                     passwordVariable: 'DOCKER_PASS'
                 )]) {
-                    sh """
+                    sh '''
                     echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
-                    docker push ${IMAGE}
-                    """
+                    docker push '"${IMAGE}"'
+                    '''
                 }
-
             }
-
         }
+
         stage('deploy on k8s') {
             steps {
                 sh """
@@ -38,8 +38,9 @@ pipeline{
                 """
             }
         }
+
         stage('smoke test') {
-            steps{
+            steps {
                 sh '''
                 kubectl rollout status deployment/sechay-website
                 kubectl get pods
