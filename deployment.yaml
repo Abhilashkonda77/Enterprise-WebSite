@@ -3,7 +3,7 @@ kind: Deployment
 metadata: 
   name: sechay-website
 spec: 
-  replicas: 2
+  replicas: 1
   selector: 
     matchLabels: 
       app: sechay-website
@@ -14,7 +14,7 @@ spec:
     spec: 
       containers: 
         - name: sechay-website
-          image: abhilash369/sechay_website:v1
+          image: IMAGE_PLACEHOLDER
           ports: 
             - containerPort: 80
 
