@@ -33,8 +33,20 @@ pipeline {
         SONARQUBE_TOKEN = credentials('SonarQubeToken')
     }
 
-
     stages {
+
+        /* ================= TRIGGER GUARD ================= */
+        stage('Trigger Check') {
+            when {
+                not {
+                    triggeredBy 'UserIdCause'
+                }
+            }
+            steps {
+                echo "❌ Auto-trigger detected (SCM / branch indexing)."
+                error("Stopping pipeline – manual builds only.")
+            }
+        }
 
         /* ---------------- CHECKOUT SCM ---------------- */
         stage('Checkout SCM') {
@@ -60,24 +72,23 @@ pipeline {
 
         /* ---------------- SONARQUBE ---------------- */
         stage('Static Analysis (SonarQube)') {
-          steps {
-            script {
-                def scannerHome = tool 'SonarScanner'
-                sh """
-                    ${scannerHome}/bin/sonar-scanner \
-                          -Dsonar.projectKey=sechay-web-app \
-                          -Dsonar.organization=sechay-team \
-                          -Dsonar.sources=. \
-                          -Dsonar.host.url=${SONARQUBE_URL} \
-                          -Dsonar.login=${SONARQUBE_TOKEN} \
-                          -Dsonar.exclusions=**/node_modules/**,**/dist/**
-                """
+            steps {
+                script {
+                    def scannerHome = tool 'SonarScanner'
+                    sh """
+                        ${scannerHome}/bin/sonar-scanner \
+                            -Dsonar.projectKey=sechay-web-app \
+                            -Dsonar.organization=sechay-team \
+                            -Dsonar.sources=. \
+                            -Dsonar.host.url=${SONARQUBE_URL} \
+                            -Dsonar.login=${SONARQUBE_TOKEN} \
+                            -Dsonar.exclusions=**/node_modules/**,**/dist/**
+                    """
                 }
             }
         }
 
-
-        /* ---------------- UNIT TESTS ---------------- */
+        /* ---------------- SMOKE TESTS ---------------- */
         stage('Smoke Tests') {
             steps {
                 script {
@@ -86,7 +97,7 @@ pipeline {
                         test -f index.html
                         test -f login.js
                         node --check login.js
-                '''
+                    '''
                 }
             }
         }
@@ -128,7 +139,6 @@ pipeline {
                 to: 'abhilashkonda770@gmail.com',
                 body: """
                 The build ${currentBuild.fullDisplayName} has failed.
-
                 Please check the Jenkins console output for more details.
                 """
             )
