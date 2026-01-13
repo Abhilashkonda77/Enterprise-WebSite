@@ -18,17 +18,18 @@ pipeline {
         stage('push to registry') {
             steps {
                 withCredentials([usernamePassword(
-                    credentialsId: env.DOCKER_CREDENTIALS,
-                    usernameVariable: 'DOCKER_USER',
-                    passwordVariable: 'DOCKER_PASS'
+                credentialsId: env.DOCKER_CREDENTIALS,
+                usernameVariable: 'DOCKER_USER',
+                passwordVariable: 'DOCKER_PASS'
                 )]) {
-                    sh '''
-                    echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
-                    docker push '"${IMAGE}"'
-                    '''
+                    sh """
+                    echo "\$DOCKER_PASS" | docker login -u "\$DOCKER_USER" --password-stdin
+                    docker push ${IMAGE}
+                    """
                 }
             }
         }
+
 
         stage('deploy on k8s') {
             steps {
