@@ -23,7 +23,7 @@ pipeline {
     }
 
     environment {
-        REGISTRY           = 'abhilashkonda77/enterprise-website'
+        REGISTRY           = 'abhilash369/enterprise-website'
         IMAGETAG           = "${env.BUILD_NUMBER}"
         GIT_CREDENTIALS    = 'github-pat'
         DOCKER_CREDENTIALS = 'docker_creds'
@@ -103,11 +103,13 @@ pipeline {
         }
 
         /* ---------------- DOCKER BUILD ---------------- */
-        stage('Build Docker Image') {
+        stage('Build & Pushing Docker Image to Registry') {
             steps {
                 script {
                     echo 'Building Docker image...'
                     sh "docker build -t ${REGISTRY}:${IMAGETAG} ."
+                    echo 'Pushing Docker image to registry..'
+                    sh "docker push ${REGISTRY}:${IMAGETAG} ."
                 }
             }
         }
