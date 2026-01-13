@@ -60,13 +60,15 @@ pipeline {
           steps {
             script {
                 def scannerHome = tool 'SonarScanner'
-                sh '''
+                sh """
                     ${scannerHome}/bin/sonar-scanner \
                           -Dsonar.projectKey=sechay-web-app \
                           -Dsonar.organization=sechay-team \
                           -Dsonar.sources=. \
+                          -Dsonar.host.url=${SONARQUBE_URL} \
+                          -Dsonar.login=${SONARQUBE_TOKEN} \
                           -Dsonar.exclusions=**/node_modules/**,**/dist/**
-                '''
+                """
                 }
             }
         }
