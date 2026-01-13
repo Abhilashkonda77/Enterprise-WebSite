@@ -62,10 +62,12 @@ pipeline {
                 def scannerHome = tool 'SonarScanner'
                 sh """
                     ${scannerHome}/bin/sonar-scanner \
-                          -Dsonar.projectKey=your-project-key \
+                          -Dsonar.projectKey=sechay-web-app \
+                          -Dsonar.organization=sechay-team \
                           -Dsonar.sources=src \
-                          -Dsonar.host.url=http://your-sonarqube-server-url \
-                          -Dsonar.login=your-sonarqube-token
+                          -Dsonar.host.url=${SONARQUBE_URL} \
+                          -Dsonar.login=${SONARQUBE_TOKEN} \
+                          -Dsonar.exclusions=**/node_modules/**,**/dist/**
                 """
                 }
             }
