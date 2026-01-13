@@ -9,7 +9,7 @@ pipeline {
     }
 
     environment {
-        REGISTRY = "abhilashkonda77/enterprise-website"
+        REGISTRY = "abhilash369/enterprise-website"
         IMAGE    = "${REGISTRY}:${params.IMAGE_TAG}"
         DOCKER_CREDENTIALS = "docker_creds"
     }
