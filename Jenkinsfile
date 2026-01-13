@@ -1,8 +1,11 @@
 pipeline {
     agent any
 
-    /* Multibranch pipelines already do checkout */
     options {
+        buildDiscarder(logRotator(
+            numToKeepStr: '10',
+            daysToKeepStr: '14'
+        ))
         skipDefaultCheckout(true)
     }
 
