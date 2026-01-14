@@ -109,7 +109,7 @@ pipeline {
                     echo 'Building Docker image...'
                     sh "docker build -t ${REGISTRY}:${IMAGETAG} ."
                     echo 'Pushing Docker image to registry..'
-                    sh "docker push ${REGISTRY}:${IMAGETAG} ."
+                    sh "docker push ${REGISTRY}:${IMAGETAG}"
                 }
             }
         }
