@@ -10,12 +10,12 @@ pipeline {
 
     environment {
         REGISTRY = "abhilash369/enterprise-website"
-        IMAGE    = "${REGISTRY}:${params.IMAGE_TAG}"
+        IMAGE    = "${params.IMAGE_TAG}"
         DOCKER_CREDENTIALS = "docker_creds"
     }
 
     stages {
-        stage('push to registry') {
+        stage('Pull Image') {
             steps {
                 withCredentials([usernamePassword(
                 credentialsId: env.DOCKER_CREDENTIALS,
@@ -24,7 +24,7 @@ pipeline {
                 )]) {
                     sh """
                     echo "\$DOCKER_PASS" | docker login -u "\$DOCKER_USER" --password-stdin
-                    docker push ${IMAGE}
+                    docker pull ${IMAGE}
                     """
                 }
             }
