@@ -18,4 +18,9 @@ spec:
           image: IMAGE_PLACEHOLDER
           ports: 
             - containerPort: 80
-
+        - name: nginx-exporter
+          image: nginx/nginx-prometheus-exporter:latest
+          args:
+            - -nginx.scrape-uri=http://127.0.0.1/nginx_status
+          ports:
+            - containerPort: 9113
