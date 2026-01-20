@@ -2,13 +2,13 @@ pipeline{
     agent any
 
     stages {
-        stage('Identify Activate Environment') {
+        stage('Identify Active Environment') {
             steps {
                 script {
-                    ACTIVE_ENV =sh(
-                        script:"""
-                    kubectl get svc sechay-website-service -n enterprise-website -o jsonpath='{.spec.selector.version}'
-                    """,
+                   def ACTIVE_ENV =sh(
+                        script:'''
+                    kubectl get svc sechay-website-service -n enterprise-website -o jsonpath={.spec.selector.version}
+                    ''',
                         returnStdout: true
                     ).trim()
                     echo "Active Environment: ${ACTIVE_ENV}"
