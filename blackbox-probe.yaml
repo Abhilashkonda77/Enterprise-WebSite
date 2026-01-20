@@ -1,0 +1,20 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: enterprise-http-probe
+  namespace: monitoring
+  labels:
+    release: monitoring
+spec:
+  selector:
+    matchLabels:
+      app: sechay-website
+  namespaceSelector:
+    matchNames:
+      - enterprise-website
+  endpoints:
+  - port: http
+    path: /probe
+    params:
+      module: [http_2xx]
+      target: [http://sechay-website-service.enterprise-website.svc.cluster.local]

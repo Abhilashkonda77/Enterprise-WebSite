@@ -1,0 +1,41 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: enterprise-website-alerts
+  namespace: monitoring
+  labels:
+    release: monitoring
+spec:
+  groups:
+  - name: enterprise.rules
+    rules:
+
+    # 1️⃣ Pod not ready
+    - alert: PodNotReady
+      expr: kube_pod_status_ready{namespace="enterprise-website"} == 0
+      for: 1m
+      labels:
+        severity: critical
+      annotations:
+        summary: Pod not ready
+        description: One or more pods are not ready.
+
+    # 2️⃣ CrashLoopBackOff
+    - alert: PodCrashLooping
+      expr: kube_pod_container_status_waiting_reason{reason="CrashLoopBackOff",namespace="enterprise-website"} > 0
+      for: 1m
+      labels:
+        severity: critical
+      annotations:
+        summary: Pod CrashLoopBackOff
+        description: Pod is restarting continuously.
+
+    # 3️⃣ Service NOT returning HTTP 200
+    - alert: ServiceDown
+      expr: probe_http_status_code{namespace="enterprise-website"} != 200
+      for: 1m
+      labels:
+        severity: critical
+      annotations:
+        summary: Service not responding with 200
+        description: Service HTTP response is not 200.
