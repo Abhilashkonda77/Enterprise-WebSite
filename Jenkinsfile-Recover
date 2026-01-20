@@ -1,0 +1,56 @@
+pipeline{
+    agent any
+
+    stages {
+        stage('Identify Activate Environment') {
+            steps {
+                script {
+                    ACTIVE_ENV =sh(
+                        script:"""
+                    kubectl get svc sechay-website-service -n enterprise-website -o jsonpath='{.spec.selector.version}'
+                    """,
+                        returnStdout: true
+                    ).trim()
+                    echo "Active Environment: ${ACTIVE_ENV}"
+                }
+                
+            }
+        }
+        stage('Validate Health') {
+            steps {
+                sh '''
+                kubectl get pods -n enterprise-website 
+                kubectl get deploy -n enterprise-website
+                '''
+            }
+        }
+        stage('Decide Recovery Action') {
+            steps {
+                script{
+                    if (ACTIVE_ENV == "blue") {
+                        TARGET_ENV = "green"
+                    }
+                    else {
+                        TARGET_ENV = "blue"
+                    }
+                    echo "Switching traffic to : ${TARGET_ENV}"
+                }
+            }
+        }
+        stage('Switch Traffic') {
+            steps {
+                sh """
+                kubectl patch svc sechay-website-service -n enterprise-website -p '{"spec":{"selector":{"version":"${TARGET_ENV}"}}}'
+                """
+            }
+        }
+        stage('Post-Recovery Validation') {
+            steps {
+                sh '''
+                sleep 10
+                kubectl get pods -n enterprise-website  
+                '''
+            }
+        }
+    }
+}
