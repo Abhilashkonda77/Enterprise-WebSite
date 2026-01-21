@@ -57,10 +57,10 @@ pipeline {
 
         stage('Post-Recovery Validation') {
             steps {
-                sh '''
+                sh """
                 sleep 10
                 kubectl get pods -n enterprise-website -l version=${env.TARGET_ENV}
-                '''
+                """
             }
         }
     }
