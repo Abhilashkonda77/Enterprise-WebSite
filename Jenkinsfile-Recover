@@ -1,54 +1,65 @@
-pipeline{
+pipeline {
     agent any
 
     stages {
+
         stage('Identify Active Environment') {
             steps {
                 script {
-                   def ACTIVE_ENV =sh(
-                        script:'''
-                    kubectl get svc sechay-website-service -n enterprise-website -o jsonpath={.spec.selector.version}
-                    ''',
+                    env.ACTIVE_ENV = sh(
+                        script: '''
+                        kubectl get svc sechay-website-service \
+                        -n enterprise-website \
+                        -o jsonpath="{.spec.selector.version}"
+                        ''',
                         returnStdout: true
                     ).trim()
-                    echo "Active Environment: ${ACTIVE_ENV}"
+
+                    echo "Active Environment: ${env.ACTIVE_ENV}"
                 }
-                
             }
         }
+
         stage('Validate Health') {
             steps {
                 sh '''
-                kubectl get pods -n enterprise-website 
+                kubectl get pods -n enterprise-website
                 kubectl get deploy -n enterprise-website
                 '''
             }
         }
+
         stage('Decide Recovery Action') {
             steps {
-                script{
-                    if (ACTIVE_ENV == "blue") {
-                        TARGET_ENV = "green"
+                script {
+                    if (env.ACTIVE_ENV == "blue") {
+                        env.TARGET_ENV = "green"
+                    } else if (env.ACTIVE_ENV == "green") {
+                        env.TARGET_ENV = "blue"
+                    } else {
+                        error "Unknown ACTIVE_ENV value: ${env.ACTIVE_ENV}"
                     }
-                    else {
-                        TARGET_ENV = "blue"
-                    }
-                    echo "Switching traffic to : ${TARGET_ENV}"
+
+                    echo "Switching traffic to: ${env.TARGET_ENV}"
                 }
             }
         }
+
         stage('Switch Traffic') {
             steps {
                 sh """
-                kubectl patch svc sechay-website-service -n enterprise-website -p '{"spec":{"selector":{"version":"${TARGET_ENV}"}}}'
+                kubectl patch svc sechay-website-service \
+                -n enterprise-website \
+                -p '{\"spec\":{\"selector\":{\"app\":\"sechay-website\",\"version\":\"${env.TARGET_ENV}\"}}}'
                 """
             }
         }
+
         stage('Post-Recovery Validation') {
             steps {
                 sh '''
                 sleep 10
-                kubectl get pods -n enterprise-website  
+                kubectl get pods -n enterprise-website
                 '''
             }
         }
