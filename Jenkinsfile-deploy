@@ -34,8 +34,8 @@ pipeline {
         stage('deploy on k8s') {
             steps {
                 sh """
-                sed -i 's|IMAGE_PLACEHOLDER|${IMAGE}|g' deployment.yaml
-                kubectl apply -f deployment.yaml
+                sed -i 's|IMAGE_PLACEHOLDER|${IMAGE}|g' deployment-green.yaml
+                kubectl apply -f deployment-green.yaml
                 """
             }
         }

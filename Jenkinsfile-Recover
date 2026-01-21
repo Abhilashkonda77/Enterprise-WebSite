@@ -59,7 +59,7 @@ pipeline {
             steps {
                 sh '''
                 sleep 10
-                kubectl get pods -n enterprise-website
+                kubectl get pods -n enterprise-website -l version=${env.TARGET_ENV}
                 '''
             }
         }
