@@ -17,7 +17,7 @@ spec:
     spec: 
       containers: 
         - name: sechay-website
-          image: abhilash369/enterprise-website:26
+          image: abhilash369/enterprise-website:32
           ports: 
             - containerPort: 80
         - name: nginx-exporter
